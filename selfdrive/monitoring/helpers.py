@@ -171,7 +171,6 @@ class DriverMonitoring:
     self.dcam_reset_cnt = 0
 
     self.params = Params()
-    self.too_distracted = self.params.get_bool("DriverTooDistracted")
 
     self._reset_awareness()
     self._set_timers(active_monitoring=True)
@@ -325,16 +324,6 @@ class DriverMonitoring:
 
   def _update_events(self, driver_engaged, op_engaged, standstill, wrong_gear, car_speed):
     self._reset_events()
-    # Block engaging until ignition cycle after max number or time of distractions
-    if self.terminal_alert_cnt >= self.settings._MAX_TERMINAL_ALERTS or \
-       self.terminal_time >= self.settings._MAX_TERMINAL_DURATION:
-      if not self.too_distracted:
-        self.params.put_bool_nonblocking("DriverTooDistracted", True)
-      self.too_distracted = True
-
-    # Always-on distraction lockout is temporary
-    if self.too_distracted or (self.always_on and self.awareness <= self.threshold_prompt):
-      self.current_events.add(EventName.tooDistracted)
 
     always_on_valid = self.always_on and not wrong_gear
     if (driver_engaged and self.awareness > 0 and not self.active_monitoring_mode) or \
