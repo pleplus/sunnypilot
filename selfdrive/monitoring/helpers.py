@@ -362,21 +362,21 @@ class DriverMonitoring:
       # should always be counting if distracted unless at standstill (lowspeed for always-on) and reaching orange
       # also will not be reaching 0 if DM is active when not engaged
       if not (standstill_orange_exemption or always_on_red_exemption or (always_on_lowspeed_exemption and _reaching_audible)):
-        self.awareness = max(self.awareness - self.step_change, -0.1)
+        self.awareness = 1.0  # No decrease
 
     alert = None
     if self.awareness <= 0.:
       # terminal red alert: disengagement required
-      alert = EventName.driverDistracted if self.active_monitoring_mode else EventName.driverUnresponsive
+      alert = None  # Disabled
       self.terminal_time += 1
       if awareness_prev > 0.:
         self.terminal_alert_cnt += 1
     elif self.awareness <= self.threshold_prompt:
       # prompt orange alert
-      alert = EventName.promptDriverDistracted if self.active_monitoring_mode else EventName.promptDriverUnresponsive
+      alert = None  # Disabled
     elif self.awareness <= self.threshold_pre and not always_on_lowspeed_exemption:
       # pre green alert
-      alert = EventName.preDriverDistracted if self.active_monitoring_mode else EventName.preDriverUnresponsive
+      alert = None  # Disabled
 
     if alert is not None:
       self.current_events.add(alert)
